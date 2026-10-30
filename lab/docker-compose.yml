@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  rabbit-target-ftp:
+    image: fauria/vsftpd
+    container_name: rabbit_ftp_lab
+    ports:
+      - "127.0.0.1:21:21"
+      - "127.0.0.1:20:20"
+      - "127.0.0.1:21100-21110:21100-21110"
+    environment:
+      - FTP_USER=rabbit_auditor
+      - FTP_PASS=Audit2026Pass!
+      - PASV_ADDRESS=127.0.0.1
+      - PASV_MIN_PORT=21100
+      - PASV_MAX_PORT=21110
+      - ANONYMOUS_ENABLE=YES
+    volumes:
+      - ./configurations/ftp_data:/home/vsftpd/rabbit_auditor
+    restart: unless-stopped
+
+  rabbit-target-web:
+    image: httpd:2.4-alpine
+    container_name: rabbit_web_lab
+    ports:
+      - "127.0.0.1:80:80"
+    volumes:
+      - ./configurations/web_data:/usr/local/apache2/htdocs
+    restart: unless-stopped
+
+  rabbit-target-unknown-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rabbit_unknown_service_8080
+    ports:
+      - "127.0.0.1:8080:8080"
+    restart: unless-stopped
+
